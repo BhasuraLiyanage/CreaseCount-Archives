@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreaseCount Pro • Series Analytics & Scorecards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #060913;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --border-subtle: rgba(148, 163, 184, 0.12);
+      --juniors-accent: #10b981;
+      --juniors-glow: rgba(16, 185, 129, 0.25);
+      --seniors-accent: #f59e0b;
+      --seniors-glow: rgba(245, 158, 11, 0.25);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+    .glass-card-hover {
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: rgba(148, 163, 184, 0.25);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65);
+    }
+    .tab-btn {
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+    .match-pill.active {
+      background-color: #10b981;
+      color: #022c22;
+      font-weight: 700;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    @media print {
+      body { background: #060913 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-500/30 selection:text-emerald-200 pb-16">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-50 border-b border-slate-800/80 bg-[#060913]/85 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display font-bold text-lg tracking-tight text-white">CreaseCount<span class="text-emerald-400">Pro</span></span>
+          <span class="hidden sm:inline-block ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">15 Nov 2026</span>
+        </div>
+      </div>
+
+      <!-- View Switcher -->
+      <nav class="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800 no-print">
+        <button onclick="switchView('overview')" id="nav-overview" class="tab-btn active px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-transparent text-slate-300 hover:text-white">
+          Series Overview
+        </button>
+        <button onclick="switchView('scorecards')" id="nav-scorecards" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-transparent text-slate-300 hover:text-white">
+          Match Scorecards
+        </button>
+        <button onclick="switchView('leaderboards')" id="nav-leaderboards" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-transparent text-slate-300 hover:text-white">
+          Leaderboards
+        </button>
+      </nav>
+
+      <!-- Export / Print Action -->
+      <div class="hidden md:flex items-center gap-2 no-print">
+        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+          </svg>
+          Print / Save PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+
+    <!-- Hero Series Banner -->
+    <section class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
+        <!-- Series Title & Badge -->
+        <div class="text-center lg:text-left space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Series Completed • 5-Match 5-Over Series
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Juniors Win Series <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300">4 – 1</span>
+          </h1>
+          <p class="text-slate-400 text-sm max-w-xl">
+            Complete ball-by-ball aggregated series intelligence, individual match scorecards, batting strike-rate efficiency, and bowling economy breakdowns.
+          </p>
+        </div>
+
+        <!-- Scoreboard Pill -->
+        <div class="flex items-center gap-4 sm:gap-8 bg-slate-950/75 border border-slate-800/90 px-6 sm:px-10 py-5 rounded-2xl shadow-inner">
+          <!-- Juniors -->
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-1.5 mb-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Juniors</span>
+            </div>
+            <div class="font-mono-num text-4xl sm:text-5xl font-extrabold text-white">4</div>
+            <span class="inline-block mt-1 text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300">Winners</span>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <span class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1">VS</span>
+            <div class="h-10 w-px bg-slate-800"></div>
+          </div>
+
+          <!-- Seniors -->
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-1.5 mb-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Seniors</span>
+            </div>
+            <div class="font-mono-num text-4xl sm:text-5xl font-extrabold text-slate-300">1</div>
+            
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- Special Mention: Unrecorded Opening Match & Isuru's Hat-Trick -->
+      <div class="mt-6 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-purple-500/15 border border-emerald-400/35 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
+            🎩
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950">Special Milestone • Hat-Trick</span>
+              <span class="text-xs font-semibold text-cyan-300">Opening 5-Over Match (Unrecorded on Scoreboard)</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-200 mt-1">
+              <strong class="text-white">Juniors</strong> also won an earlier 5-over opener (not logged in the digital scoreboard), highlighted by <strong class="text-emerald-300">Isuru's sensational hat-trick</strong>. All 4 recorded match scorecards & leaderboards below remain unchanged.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 4 KPI Highlight Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+        <!-- Top Batter -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex items-start justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Leading Run Scorer</p>
+            <h3 class="text-xl font-bold text-white mt-1">Madushanka</h3>
+            <p class="text-xs text-amber-400 font-medium mt-0.5">Seniors • 4 Innings</p>
+            <div class="mt-2 flex items-center gap-2 text-xs text-slate-300 font-mono-num">
+              <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">86 Runs</span>
+              <span>SR 286.67</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
+            🏏
+          </div>
+        </div>
+
+        <!-- Top Bowler -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex items-start justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Leading Wicket Taker</p>
+            <h3 class="text-xl font-bold text-white mt-1">Nethuka</h3>
+            <p class="text-xs text-emerald-400 font-medium mt-0.5">Juniors • 6.1 Overs</p>
+            <div class="mt-2 flex items-center gap-2 text-xs text-slate-300 font-mono-num">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold">6 Wkts</span>
+              <span>Econ 11.35</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+            🎯
+          </div>
+        </div>
+
+        <!-- Highest Team Total -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex items-start justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Highest Innings Total</p>
+            <h3 class="text-xl font-bold text-white mt-1">76 / 2 <span class="text-sm font-normal text-slate-400">(5.0 ov)</span></h3>
+            <p class="text-xs text-emerald-400 font-medium mt-0.5">Juniors • Match 3</p>
+            <div class="mt-2 flex items-center gap-2 text-xs text-slate-300 font-mono-num">
+              <span class="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-bold">15.20 RPO</span>
+              <span>9 Sixes</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">
+            🔥
+          </div>
+        </div>
+
+        <!-- Series Boundary Count -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex items-start justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Series Boundary Blitz</p>
+            <h3 class="text-xl font-bold text-white mt-1">54 Boundaries</h3>
+            <p class="text-xs text-purple-400 font-medium mt-0.5">300 of 403 Runs (74.4%)</p>
+            <div class="mt-2 flex items-center gap-2 text-xs text-slate-300 font-mono-num">
+              <span class="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">42 Sixes</span>
+              <span>12 Fours</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
+            ⚡
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: SERIES OVERVIEW -->
+    <div id="view-overview" class="space-y-8">
+      <!-- Match Progression Strip -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-white tracking-tight">Match-by-Match Results</h2>
+          <span class="text-xs text-slate-400">Click any match card to inspect full scorecard</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="match-summary-cards">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Charts Grid -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Team Runs Comparison Chart -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Team Totals Across Matches</h3>
+              <p class="text-xs text-slate-400">Juniors vs Seniors innings scores per match</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs">
+              <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>Juniors</span>
+              <span class="flex items-center gap-1.5 text-amber-400"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span>Seniors</span>
+            </div>
+          </div>
+          <div class="h-72">
+            <canvas id="teamScoresChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Batters Chart -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Top Run Scorers & Strike Rates</h3>
+              <p class="text-xs text-slate-400">Total series runs colored by team affiliation</p>
+            </div>
+            <span class="text-xs font-mono-num px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Top 8 Batters</span>
+          </div>
+          <div class="h-72">
+            <canvas id="topBattersChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Bowling Wickets & Economy Chart -->
+        <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Bowling Impact: Wickets Taken vs. Economy Rate</h3>
+              <p class="text-xs text-slate-400">Comparing wicket-taking volume (bars) against runs conceded per over (line)</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+              <span class="flex items-center gap-1.5 text-cyan-400"><span class="w-2.5 h-2.5 rounded-sm bg-cyan-400"></span>Wickets</span>
+              <span class="flex items-center gap-1.5 text-rose-400"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>Economy Rate (RPO)</span>
+            </div>
+          </div>
+          <div class="h-72">
+            <canvas id="bowlingImpactChart"></canvas>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 2: INTERACTIVE MATCH SCORECARDS -->
+    <div id="view-scorecards" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+        <div>
+          <h2 class="text-lg font-bold text-white">Detailed Match Scorecards</h2>
+          <p class="text-xs text-slate-400">Select a match to inspect batting and bowling breakdowns</p>
+        </div>
+        <div class="flex flex-wrap gap-2" id="match-selector-pills">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div id="active-scorecard-container" class="space-y-6">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- VIEW 3: TOURNAMENT LEADERBOARDS -->
+    <div id="view-leaderboards" class="hidden space-y-8">
+      <!-- Batting Leaderboard -->
+      <section class="glass-card rounded-2xl overflow-hidden">
+        <div class="p-6 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Tournament Batting Leaderboard</h2>
+            <p class="text-xs text-slate-400">Click column headers to sort • Filtered by team if desired</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="filterBatters('ALL')" id="bat-filter-ALL" class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950">All (12)</button>
+            <button onclick="filterBatters('Juniors')" id="bat-filter-Juniors" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Juniors</button>
+            <button onclick="filterBatters('Seniors')" id="bat-filter-Seniors" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Seniors</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/90 text-[11px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <th class="py-3.5 px-4">Rank</th>
+                <th class="py-3.5 px-4">Batter</th>
+                <th class="py-3.5 px-4">Team</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('innings')">Inns ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('runs')">Runs ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('balls')">Balls ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('sr')">Strike Rate ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('fours')">4s ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBatting('sixes')">6s ↕</th>
+                <th class="py-3.5 px-4 text-right">Boundary %</th>
+              </tr>
+            </thead>
+            <tbody id="batting-leaderboard-body" class="divide-y divide-slate-800/60 text-sm">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Bowling Leaderboard -->
+      <section class="glass-card rounded-2xl overflow-hidden">
+        <div class="p-6 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Tournament Bowling Leaderboard</h2>
+            <p class="text-xs text-slate-400">Ranked by Wickets taken, then Economy Rate</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="filterBowlers('ALL')" id="bowl-filter-ALL" class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950">All (8)</button>
+            <button onclick="filterBowlers('Juniors')" id="bowl-filter-Juniors" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Juniors</button>
+            <button onclick="filterBowlers('Seniors')" id="bowl-filter-Seniors" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Seniors</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/90 text-[11px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <th class="py-3.5 px-4">Rank</th>
+                <th class="py-3.5 px-4">Bowler</th>
+                <th class="py-3.5 px-4">Team</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBowling('overs')">Overs ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBowling('runs')">Runs ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBowling('wickets')">Wickets ↕</th>
+                <th class="py-3.5 px-4 text-right cursor-pointer hover:text-white" onclick="sortBowling('econ')">Economy ↕</th>
+                <th class="py-3.5 px-4 text-right">Bowling Avg</th>
+              </tr>
+            </thead>
+            <tbody id="bowling-leaderboard-body" class="divide-y divide-slate-800/60 text-sm">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <script>
+    // Complete Structured Dataset from CreaseCount_Series_Report_2026-11-15.xlsx
+    const seriesData = {
+      matches: [
+        {
+          id: 1,
+          title: "Match 1",
+          winner: "Juniors",
+          margin: "Won by 7 runs",
+          highlight: "Nethuka's 4/4 spells doom for Seniors chase",
+          innings: [
+            {
+              team: "Juniors",
+              score: "19/5",
+              runs: 19,
+              wickets: 5,
+              overs: "2.4 / 5",
+              extras: 4,
+              batters: [
+                { name: "Isuru", runs: 6, balls: 6, fours: 1, sixes: 0, status: "Out" },
+                { name: "Miyuna", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" },
+                { name: "Bhasura", runs: 1, balls: 3, fours: 0, sixes: 0, status: "Out" },
+                { name: "Nethuka", runs: 8, balls: 4, fours: 0, sixes: 1, status: "Out" },
+                { name: "Indunith", runs: 0, balls: 2, fours: 0, sixes: 0, status: "Not Out" },
+                { name: "Dinula", runs: 0, balls: 0, fours: 0, sixes: 0, status: "Out" }
+              ],
+              bowlers: [
+                { name: "Wasantha", overs: "1", runs: 6, wickets: 1 },
+                { name: "Irosh", overs: "1", runs: 12, wickets: 2 },
+                { name: "Asindu", overs: "0.4", runs: 1, wickets: 1 }
+              ]
+            },
+            {
+              team: "Seniors",
+              score: "12/5",
+              runs: 12,
+              wickets: 5,
+              overs: "2.3 / 5",
+              extras: 1,
+              batters: [
+                { name: "Roshan", runs: 1, balls: 1, fours: 0, sixes: 0, status: "Not Out" },
+                { name: "Wasantha", runs: 3, balls: 4, fours: 0, sixes: 0, status: "Out" },
+                { name: "Madushanka", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" },
+                { name: "Asindu", runs: 7, balls: 7, fours: 1, sixes: 0, status: "Out" },
+                { name: "Irosh", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" },
+                { name: "Akein", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" }
+              ],
+              bowlers: [
+                { name: "Nethuka", overs: "1.3", runs: 4, wickets: 4 },
+                { name: "Miyuna", overs: "1", runs: 8, wickets: 1 }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          title: "Match 2",
+          winner: "Juniors",
+          margin: "Won by 17 runs",
+          highlight: "Isuru (16*) & Nethuka (16) power Juniors to 58/3",
+          innings: [
+            {
+              team: "Juniors",
+              score: "58/3",
+              runs: 58,
+              wickets: 3,
+              overs: "5.0 / 5",
+              extras: 0,
+              batters: [
+                { name: "Isuru", runs: 16, balls: 8, fours: 0, sixes: 2, status: "Not Out" },
+                { name: "Miyuna", runs: 7, balls: 5, fours: 0, sixes: 1, status: "Out" },
+                { name: "Bhasura", runs: 7, balls: 3, fours: 0, sixes: 1, status: "Out" },
+                { name: "Nethuka", runs: 16, balls: 6, fours: 2, sixes: 1, status: "Out" },
+                { name: "Indunith", runs: 10, balls: 8, fours: 1, sixes: 0, status: "Not Out" }
+              ],
+              bowlers: [
+                { name: "Wasantha", overs: "2", runs: 21, wickets: 1 },
+                { name: "Irosh", overs: "2", runs: 27, wickets: 1 },
+                { name: "Roshan", overs: "1", runs: 10, wickets: 0 }
+              ]
+            },
+            {
+              team: "Seniors",
+              score: "41/5",
+              runs: 41,
+              wickets: 5,
+              overs: "3.4 / 5",
+              extras: 1,
+              batters: [
+                { name: "Roshan", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" },
+                { name: "Wasantha", runs: 2, balls: 3, fours: 0, sixes: 0, status: "Out" },
+                { name: "Madushanka", runs: 28, balls: 9, fours: 1, sixes: 3, status: "Out" },
+                { name: "Asindu", runs: 6, balls: 3, fours: 0, sixes: 1, status: "Out" },
+                { name: "Irosh", runs: 3, balls: 3, fours: 0, sixes: 0, status: "Not Out" },
+                { name: "Akein", runs: 1, balls: 3, fours: 0, sixes: 0, status: "Out" }
+              ],
+              bowlers: [
+                { name: "Nethuka", overs: "1.4", runs: 23, wickets: 1 },
+                { name: "Miyuna", overs: "1", runs: 14, wickets: 2 },
+                { name: "Indunith", overs: "1", runs: 4, wickets: 1 }
+              ]
+            }
+          ]
+        },
+        {
+          id: 3,
+          title: "Match 3",
+          winner: "Juniors",
+          margin: "Won by 8 runs",
+          highlight: "Miyuna's 36* off 9 balls (5 sixes) seals the series",
+          innings: [
+            {
+              team: "Juniors",
+              score: "76/2",
+              runs: 76,
+              wickets: 2,
+              overs: "5.0 / 5",
+              extras: 2,
+              batters: [
+                { name: "Isuru", runs: 11, balls: 8, fours: 0, sixes: 1, status: "Out" },
+                { name: "Miyuna", runs: 36, balls: 9, fours: 1, sixes: 5, status: "Not Out" },
+                { name: "Nethuka", runs: 26, balls: 10, fours: 1, sixes: 3, status: "Not Out" },
+                { name: "Dinula", runs: 1, balls: 3, fours: 0, sixes: 0, status: "Out" }
+              ],
+              bowlers: [
+                { name: "Wasantha", overs: "1", runs: 9, wickets: 1 },
+                { name: "Irosh", overs: "2", runs: 34, wickets: 0 },
+                { name: "Roshan", overs: "1", runs: 7, wickets: 1 },
+                { name: "Asindu", overs: "1", runs: 26, wickets: 0 }
+              ]
+            },
+            {
+              team: "Seniors",
+              score: "68/1",
+              runs: 68,
+              wickets: 1,
+              overs: "5.0 / 5",
+              extras: 0,
+              batters: [
+                { name: "Roshan", runs: 18, balls: 11, fours: 0, sixes: 2, status: "Not Out" },
+                { name: "Madushanka", runs: 23, balls: 9, fours: 2, sixes: 2, status: "Out" },
+                { name: "Asindu", runs: 27, balls: 10, fours: 1, sixes: 3, status: "Not Out" }
+              ],
+              bowlers: [
+                { name: "Indunith", overs: "1", runs: 13, wickets: 0 },
+                { name: "Nethuka", overs: "2", runs: 21, wickets: 1 },
+                { name: "Miyuna", overs: "1", runs: 16, wickets: 0 },
+                { name: "Isuru", overs: "1", runs: 18, wickets: 0 }
+              ]
+            }
+          ]
+        },
+        {
+          id: 4,
+          title: "Match 4",
+          winner: "Seniors",
+          margin: "Won by 2 wickets (1 ball left)",
+          highlight: "Madushanka's unbeaten 35* (5 sixes) denies clean sweep",
+          innings: [
+            {
+              team: "Juniors",
+              score: "62/4",
+              runs: 62,
+              wickets: 4,
+              overs: "5.0 / 5",
+              extras: 5,
+              batters: [
+                { name: "Isuru", runs: 38, balls: 13, fours: 1, sixes: 5, status: "Not Out" },
+                { name: "Miyuna", runs: 13, balls: 8, fours: 0, sixes: 2, status: "Out" },
+                { name: "Bhasura", runs: 0, balls: 2, fours: 0, sixes: 0, status: "Out" },
+                { name: "Nethuka", runs: 2, balls: 2, fours: 0, sixes: 0, status: "Out" },
+                { name: "Indunith", runs: 4, balls: 5, fours: 0, sixes: 0, status: "Out" }
+              ],
+              bowlers: [
+                { name: "Roshan", overs: "2", runs: 21, wickets: 0 },
+                { name: "Wasantha", overs: "1", runs: 15, wickets: 0 },
+                { name: "Irosh", overs: "1", runs: 12, wickets: 1 },
+                { name: "Asindu", overs: "1", runs: 14, wickets: 0 }
+              ]
+            },
+            {
+              team: "Seniors",
+              score: "67/3",
+              runs: 67,
+              wickets: 3,
+              overs: "4.5 / 5",
+              extras: 1,
+              batters: [
+                { name: "Roshan", runs: 0, balls: 1, fours: 0, sixes: 0, status: "Out" },
+                { name: "Wasantha", runs: 0, balls: 2, fours: 0, sixes: 0, status: "Out" },
+                { name: "Madushanka", runs: 35, balls: 11, fours: 0, sixes: 5, status: "Not Out" },
+                { name: "Asindu", runs: 29, balls: 13, fours: 0, sixes: 4, status: "Out" },
+                { name: "Irosh", runs: 2, balls: 2, fours: 0, sixes: 0, status: "Not Out" }
+              ],
+              bowlers: [
+                { name: "Indunith", overs: "2", runs: 18, wickets: 3 },
+                { name: "Nethuka", overs: "1", runs: 22, wickets: 0 },
+                { name: "Miyuna", overs: "1", runs: 8, wickets: 0 },
+                { name: "Isuru", overs: "0.5", runs: 19, wickets: 0 }
+              ]
+            }
+          ]
+        }
+      ],
+      battingLeaderboard: [
+        { name: "Madushanka", team: "Seniors", innings: 4, runs: 86, balls: 30, sr: 286.67, fours: 3, sixes: 10 },
+        { name: "Isuru", team: "Juniors", innings: 4, runs: 71, balls: 35, sr: 202.86, fours: 2, sixes: 8 },
+        { name: "Asindu", team: "Seniors", innings: 4, runs: 69, balls: 33, sr: 209.09, fours: 2, sixes: 8 },
+        { name: "Miyuna", team: "Juniors", innings: 4, runs: 56, balls: 23, sr: 243.48, fours: 1, sixes: 8 },
+        { name: "Nethuka", team: "Juniors", innings: 4, runs: 52, balls: 22, sr: 236.36, fours: 3, sixes: 5 },
+        { name: "Roshan", team: "Seniors", innings: 4, runs: 19, balls: 14, sr: 135.71, fours: 0, sixes: 2 },
+        { name: "Indunith", team: "Juniors", innings: 3, runs: 14, balls: 15, sr: 93.33, fours: 1, sixes: 0 },
+        { name: "Bhasura", team: "Juniors", innings: 3, runs: 8, balls: 8, sr: 100.00, fours: 0, sixes: 1 },
+        { name: "Wasantha", team: "Seniors", innings: 3, runs: 5, balls: 9, sr: 55.56, fours: 0, sixes: 0 },
+        { name: "Irosh", team: "Seniors", innings: 3, runs: 5, balls: 6, sr: 83.33, fours: 0, sixes: 0 },
+        { name: "Dinula", team: "Juniors", innings: 2, runs: 1, balls: 3, sr: 33.33, fours: 0, sixes: 0 },
+        { name: "Akein", team: "Seniors", innings: 2, runs: 1, balls: 4, sr: 25.00, fours: 0, sixes: 0 }
+      ],
+      bowlingLeaderboard: [
+        { name: "Nethuka", team: "Juniors", overs: 6.1, runs: 70, wickets: 6, econ: 11.35 },
+        { name: "Indunith", team: "Juniors", overs: 4.0, runs: 35, wickets: 4, econ: 8.75 },
+        { name: "Irosh", team: "Seniors", overs: 6.0, runs: 85, wickets: 4, econ: 14.17 },
+        { name: "Wasantha", team: "Seniors", overs: 5.0, runs: 51, wickets: 3, econ: 10.20 },
+        { name: "Miyuna", team: "Juniors", overs: 4.0, runs: 46, wickets: 3, econ: 11.50 },
+        { name: "Roshan", team: "Seniors", overs: 4.0, runs: 38, wickets: 1, econ: 9.50 },
+        { name: "Asindu", team: "Seniors", overs: 2.4, runs: 41, wickets: 1, econ: 15.38 },
+        { name: "Isuru", team: "Juniors", overs: 1.5, runs: 37, wickets: 0, econ: 20.18, note: "🎩 Hat-trick in unrecorded opener" }
+      ]
+    };
+
+    let currentView = 'overview';
+    let selectedMatchId = 1;
+    let batTeamFilter = 'ALL';
+    let bowlTeamFilter = 'ALL';
+    let batSortKey = 'runs';
+    let batSortAsc = false;
+    let bowlSortKey = 'wickets';
+    let bowlSortAsc = false;
+
+    function switchView(view) {
+      currentView = view;
+      ['overview', 'scorecards', 'leaderboards'].forEach(v => {
+        document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
+        document.getElementById(`nav-${v}`).classList.toggle('active', v === view);
+      });
+    }
+
+    function openMatchScorecard(matchId) {
+      selectedMatchId = matchId;
+      switchView('scorecards');
+      renderScorecardsView();
+    }
+
+    function renderOverviewCards() {
+      const container = document.getElementById('match-summary-cards');
+      container.innerHTML = seriesData.matches.map(m => {
+        const isJuniorsWin = m.winner === 'Juniors';
+        const badgeClass = isJuniorsWin
+          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+          : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+
+        return `
+          <div onclick="openMatchScorecard(${m.id})" class="glass-card glass-card-hover rounded-2xl p-5 cursor-pointer flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">${m.title}</span>
+                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${badgeClass}">${m.winner} Won</span>
+              </div>
+              
+              <div class="space-y-2.5 my-3">
+                ${m.innings.map(inn => {
+                  const isTeamWinner = inn.team === m.winner;
+                  const dotColor = inn.team === 'Juniors' ? 'bg-emerald-400' : 'bg-amber-400';
+                  return `
+                    <div class="flex items-center justify-between ${isTeamWinner ? 'text-white font-bold' : 'text-slate-400'}">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full ${dotColor}"></span>
+                        <span class="text-sm">${inn.team}</span>
+                      </div>
+                      <div class="font-mono-num text-sm">
+                        <span>${inn.score}</span>
+                        <span class="text-xs text-slate-500 ml-1">(${inn.overs.split('/')[0].trim()} ov)</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <div class="pt-3 mt-3 border-t border-slate-800/80">
+              <p class="text-xs font-medium text-cyan-300">${m.margin}</p>
+              <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">${m.highlight}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderScorecardsView() {
+      // Render Pills
+      const pillsContainer = document.getElementById('match-selector-pills');
+      pillsContainer.innerHTML = seriesData.matches.map(m => `
+        <button onclick="openMatchScorecard(${m.id})" 
+          class="match-pill px-4 py-2 rounded-xl text-xs font-semibold border border-slate-700/80 transition ${m.id === selectedMatchId ? 'active' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+          ${m.title} (${m.winner === 'Juniors' ? 'JUN' : 'SEN'})
+        </button>
+      `).join('');
+
+      // Render Active Match Details
+      const match = seriesData.matches.find(m => m.id === selectedMatchId);
+      const container = document.getElementById('active-scorecard-container');
+      const isJuniorsWin = match.winner === 'Juniors';
+
+      container.innerHTML = `
+        <div class="glass-card rounded-2xl p-6 border-l-4 ${isJuniorsWin ? 'border-l-emerald-400' : 'border-l-amber-400'}">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-3">
+                <h3 class="text-2xl font-extrabold text-white">${match.title} Scorecard</h3>
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${isJuniorsWin ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                  ${match.winner} — ${match.margin}
+                </span>
+              </div>
+              <p class="text-sm text-slate-400 mt-1">${match.highlight}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          ${match.innings.map((inn, idx) => {
+            const isJun = inn.team === 'Juniors';
+            const headerGradient = isJun 
+              ? 'from-emerald-500/20 to-teal-500/5 border-emerald-500/30' 
+              : 'from-amber-500/20 to-orange-500/5 border-amber-500/30';
+            const badgeColor = isJun ? 'text-emerald-400' : 'text-amber-400';
+
+            return `
+              <div class="glass-card rounded-2xl overflow-hidden flex flex-col">
+                <!-- Innings Header -->
+                <div class="p-5 bg-gradient-to-r ${headerGradient} border-b border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span class="text-[11px] font-bold uppercase tracking-widest ${badgeColor}">Innings ${idx + 1}</span>
+                    <h4 class="text-xl font-bold text-white">${inn.team}</h4>
+                  </div>
+                  <div class="text-right font-mono-num">
+                    <div class="text-2xl font-extrabold text-white">${inn.score}</div>
+                    <div class="text-xs text-slate-300">Overs: ${inn.overs}</div>
+                  </div>
+                </div>
+
+                <!-- Batting Table -->
+                <div class="p-4 flex-1">
+                  <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 px-2">Batting Card</h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                      <thead>
+                        <tr class="text-[11px] uppercase text-slate-500 border-b border-slate-800">
+                          <th class="py-2 px-2">Batter</th>
+                          <th class="py-2 px-2">Status</th>
+                          <th class="py-2 px-2 text-right">R</th>
+                          <th class="py-2 px-2 text-right">B</th>
+                          <th class="py-2 px-2 text-right">4s</th>
+                          <th class="py-2 px-2 text-right">6s</th>
+                          <th class="py-2 px-2 text-right">SR</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-800/50">
+                        ${inn.batters.map(b => {
+                          const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(1) : '0.0';
+                          const isNotOut = b.status === 'Not Out';
+                          return `
+                            <tr class="hover:bg-slate-800/30">
+                              <td class="py-2.5 px-2 font-semibold text-white">${b.name}${isNotOut ? '*' : ''}</td>
+                              <td class="py-2.5 px-2 text-xs">
+                                <span class="px-2 py-0.5 rounded ${isNotOut ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-800 text-slate-400'}">${b.status}</span>
+                              </td>
+                              <td class="py-2.5 px-2 text-right font-mono-num font-bold text-white">${b.runs}</td>
+                              <td class="py-2.5 px-2 text-right font-mono-num text-slate-400">${b.balls}</td>
+                              <td class="py-2.5 px-2 text-right font-mono-num text-slate-300">${b.fours}</td>
+                              <td class="py-2.5 px-2 text-right font-mono-num text-cyan-400 font-semibold">${b.sixes}</td>
+                              <td class="py-2.5 px-2 text-right font-mono-num text-xs text-slate-400">${sr}</td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Bowling Table -->
+                <div class="p-4 bg-slate-950/40 border-t border-slate-800/80">
+                  <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 px-2">Bowling Card</h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                      <thead>
+                        <tr class="text-[11px] uppercase text-slate-500 border-b border-slate-800">
+                          <th class="py-2 px-2">Bowler</th>
+                          <th class="py-2 px-2 text-right">O</th>
+                          <th class="py-2 px-2 text-right">R</th>
+                          <th class="py-2 px-2 text-right">W</th>
+                          <th class="py-2 px-2 text-right">Econ</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-800/50">
+                        ${inn.bowlers.map(bw => {
+                          const parts = bw.overs.split('.');
+                          const realOvers = parseInt(parts[0]) + (parts[1] ? parseInt(parts[1]) / 6 : 0);
+                          const econ = realOvers > 0 ? (bw.runs / realOvers).toFixed(2) : '0.00';
+                          return `
+                            <tr class="hover:bg-slate-800/30">
+                              <td class="py-2 px-2 font-medium text-slate-200">${bw.name}</td>
+                              <td class="py-2 px-2 text-right font-mono-num text-slate-300">${bw.overs}</td>
+                              <td class="py-2 px-2 text-right font-mono-num text-slate-300">${bw.runs}</td>
+                              <td class="py-2 px-2 text-right font-mono-num font-bold ${bw.wickets >= 3 ? 'text-emerald-400' : 'text-white'}">${bw.wickets}</td>
+                              <td class="py-2 px-2 text-right font-mono-num text-xs text-slate-400">${econ}</td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function filterBatters(team) {
+      batTeamFilter = team;
+      ['ALL', 'Juniors', 'Seniors'].forEach(t => {
+        const btn = document.getElementById(`bat-filter-${t}`);
+        if (t === team) {
+          btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950';
+        } else {
+          btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700';
+        }
+      });
+      renderLeaderboards();
+    }
+
+    function filterBowlers(team) {
+      bowlTeamFilter = team;
+      ['ALL', 'Juniors', 'Seniors'].forEach(t => {
+        const btn = document.getElementById(`bowl-filter-${t}`);
+        if (t === team) {
+          btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950';
+        } else {
+          btn.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700';
+        }
+      });
+      renderLeaderboards();
+    }
+
+    function sortBatting(key) {
+      if (batSortKey === key) batSortAsc = !batSortAsc;
+      else { batSortKey = key; batSortAsc = false; }
+      renderLeaderboards();
+    }
+
+    function sortBowling(key) {
+      if (bowlSortKey === key) bowlSortAsc = !bowlSortAsc;
+      else { bowlSortKey = key; bowlSortAsc = (key === 'econ'); }
+      renderLeaderboards();
+    }
+
+    function renderLeaderboards() {
+      // Batting
+      let batters = [...seriesData.battingLeaderboard];
+      if (batTeamFilter !== 'ALL') batters = batters.filter(b => b.team === batTeamFilter);
+      batters.sort((a, b) => batSortAsc ? a[batSortKey] - b[batSortKey] : b[batSortKey] - a[batSortKey]);
+
+      const batBody = document.getElementById('batting-leaderboard-body');
+      batBody.innerHTML = batters.map((b, i) => {
+        const boundaryRuns = (b.fours * 4) + (b.sixes * 6);
+        const boundaryPct = b.runs > 0 ? Math.round((boundaryRuns / b.runs) * 100) : 0;
+        const isJun = b.team === 'Juniors';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3.5 px-4 font-mono-num text-xs text-slate-500">#${i + 1}</td>
+            <td class="py-3.5 px-4 font-bold text-white">${b.name}</td>
+            <td class="py-3.5 px-4">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${isJun ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">
+                ${b.team}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-slate-300">${b.innings}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num font-extrabold text-white">${b.runs}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-slate-400">${b.balls}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num font-semibold ${b.sr >= 200 ? 'text-cyan-400' : 'text-slate-300'}">${b.sr.toFixed(2)}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-slate-300">${b.fours}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num font-bold text-purple-300">${b.sixes}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-xs text-slate-400">${boundaryPct}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Bowling
+      let bowlers = [...seriesData.bowlingLeaderboard];
+      if (bowlTeamFilter !== 'ALL') bowlers = bowlers.filter(b => b.team === bowlTeamFilter);
+      bowlers.sort((a, b) => {
+        if (bowlSortAsc) return a[bowlSortKey] - b[bowlSortKey];
+        if (b[bowlSortKey] !== a[bowlSortKey]) return b[bowlSortKey] - a[bowlSortKey];
+        return a.econ - b.econ;
+      });
+
+      const bowlBody = document.getElementById('bowling-leaderboard-body');
+      bowlBody.innerHTML = bowlers.map((bw, i) => {
+        const avg = bw.wickets > 0 ? (bw.runs / bw.wickets).toFixed(2) : '—';
+        const isJun = bw.team === 'Juniors';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3.5 px-4 font-mono-num text-xs text-slate-500">#${i + 1}</td>
+            <td class="py-3.5 px-4 font-bold text-white">
+              <div class="flex items-center gap-2">
+                <span>${bw.name}</span>
+                ${bw.note ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${bw.note}</span>` : ''}
+              </div>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${isJun ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">
+                ${bw.team}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-slate-300">${bw.overs}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-slate-300">${bw.runs}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num font-extrabold text-emerald-400">${bw.wickets}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num font-semibold ${bw.econ <= 10 ? 'text-cyan-400' : 'text-slate-300'}">${bw.econ.toFixed(2)}</td>
+            <td class="py-3.5 px-4 text-right font-mono-num text-xs text-slate-400">${avg}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function initCharts() {
+      Chart.defaults.color = '#94a3b8';
+      Chart.defaults.font.family = "'Inter', sans-serif";
+
+      // 1. Team Totals Chart
+      new Chart(document.getElementById('teamScoresChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Match 1', 'Match 2', 'Match 3', 'Match 4'],
+          datasets: [
+            {
+              label: 'Juniors',
+              data: [19, 58, 76, 62],
+              backgroundColor: 'rgba(16, 185, 129, 0.85)',
+              borderColor: '#10b981',
+              borderWidth: 1,
+              borderRadius: 8,
+              barPercentage: 0.7
+            },
+            {
+              label: 'Seniors',
+              data: [12, 41, 68, 67],
+              backgroundColor: 'rgba(245, 158, 11, 0.85)',
+              borderColor: '#f59e0b',
+              borderWidth: 1,
+              borderRadius: 8,
+              barPercentage: 0.7
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 12,
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} runs`
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(148, 163, 184, 0.08)' },
+              ticks: { font: { family: "'JetBrains Mono', monospace" } }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+      // 2. Top Batters Horizontal Bar Chart
+      const top8Batters = seriesData.battingLeaderboard.slice(0, 8);
+      new Chart(document.getElementById('topBattersChart'), {
+        type: 'bar',
+        data: {
+          labels: top8Batters.map(b => b.name),
+          datasets: [{
+            label: 'Runs',
+            data: top8Batters.map(b => b.runs),
+            backgroundColor: top8Batters.map(b => b.team === 'Juniors' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(245, 158, 11, 0.85)'),
+            borderRadius: 6,
+            barThickness: 18
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 12,
+              callbacks: {
+                label: (ctx) => {
+                  const b = top8Batters[ctx.dataIndex];
+                  return ` ${b.runs} runs (${b.balls} balls) • SR: ${b.sr} • ${b.sixes}x6s`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: 'rgba(148, 163, 184, 0.08)' },
+              ticks: { font: { family: "'JetBrains Mono', monospace" } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#e2e8f0', font: { weight: '600' } }
+            }
+          }
+        }
+      });
+
+      // 3. Bowling Wickets & Economy Combo Chart
+      const bowlers = seriesData.bowlingLeaderboard;
+      new Chart(document.getElementById('bowlingImpactChart'), {
+        type: 'bar',
+        data: {
+          labels: bowlers.map(b => `${b.name} (${b.team === 'Juniors' ? 'JUN' : 'SEN'})`),
+          datasets: [
+            {
+              type: 'line',
+              label: 'Economy Rate',
+              data: bowlers.map(b => b.econ),
+              borderColor: '#fb7185',
+              backgroundColor: '#fb7185',
+              borderWidth: 2.5,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              tension: 0.3,
+              yAxisID: 'y1'
+            },
+            {
+              type: 'bar',
+              label: 'Wickets',
+              data: bowlers.map(b => b.wickets),
+              backgroundColor: 'rgba(34, 211, 238, 0.75)',
+              borderColor: '#22d3ee',
+              borderWidth: 1,
+              borderRadius: 8,
+              barPercentage: 0.45,
+              yAxisID: 'y'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 12
+            }
+          },
+          scales: {
+            y: {
+              type: 'linear',
+              position: 'left',
+              beginAtZero: true,
+              title: { display: true, text: 'Wickets Taken', color: '#22d3ee' },
+              grid: { color: 'rgba(148, 163, 184, 0.08)' },
+              ticks: { stepSize: 1, font: { family: "'JetBrains Mono', monospace" } }
+            },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              beginAtZero: true,
+              title: { display: true, text: 'Economy (RPO)', color: '#fb7185' },
+              grid: { drawOnChartArea: false },
+              ticks: { font: { family: "'JetBrains Mono', monospace" } }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // Boot Application
+    document.addEventListener('DOMContentLoaded', () => {
+      renderOverviewCards();
+      renderScorecardsView();
+      renderLeaderboards();
+      initCharts();
+    });
+  </script>
+</body>
+</html>
