@@ -50,10 +50,10 @@
         </div>
         <div>
           <span class="font-display font-bold text-lg tracking-tight text-white">CreaseCount<span class="text-emerald-400">Pro</span></span>
-          <span class="ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">Archives</span>
+          <span class="ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">Auto-Archive</span>
         </div>
       </div>
-      <div class="text-xs text-slate-400 font-mono-num" id="total-series-badge">1 Series Logged</div>
+      <div class="text-xs text-slate-400 font-mono-num" id="total-series-badge">Scanning repo...</div>
     </div>
   </header>
 
@@ -64,13 +64,14 @@
     <section class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
       <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
-          Sunday Cricket Series Vault
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Auto-Synced Vault
         </div>
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
           Select a Series Report
         </h1>
         <p class="text-slate-400 text-sm max-w-2xl">
-          Browse every Sunday series scorecard, batting leaderboard, and bowling breakdown. Use the quick jump menu below or pick any card from the archive timeline.
+          Every <code class="text-cyan-300 font-mono-num">YYYY-MM-DD.html</code> report uploaded to this repository appears here automatically. Pick any Sunday series below to open its full scorecard.
         </p>
       </div>
 
@@ -79,7 +80,7 @@
         <div class="relative flex-1">
           <select id="series-dropdown" aria-label="Select Series"
             class="w-full appearance-none bg-slate-950/90 border border-slate-700/90 hover:border-emerald-500/50 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3.5 pr-10 text-sm font-semibold text-white transition cursor-pointer">
-            <!-- Populated automatically by JS -->
+            <option value="">Loading series reports...</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-slate-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -98,57 +99,146 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <h2 class="text-lg font-bold text-white">All Archived Series</h2>
       <div class="relative w-full sm:w-64">
-        <input type="text" id="search-input" oninput="renderArchive()" placeholder="Search date, player, winner..."
+        <input type="text" id="search-input" oninput="renderArchive()" placeholder="Search date, result, highlights..."
           class="w-full bg-slate-900/90 border border-slate-800 focus:border-emerald-500/50 focus:outline-none rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500" />
       </div>
     </div>
 
     <!-- Series Cards List -->
     <div id="series-cards-list" class="space-y-4">
-      <!-- Populated automatically by JS -->
+      <div class="glass-card rounded-2xl p-8 text-center text-sm text-slate-400">
+        Fetching reports from GitHub repository...
+      </div>
     </div>
 
   </main>
 
   <footer class="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
-    CreaseCount Pro • Permanent Series Archive
+    CreaseCount Pro • Automatic GitHub Pages Archive
   </footer>
 
   <script>
-    // =========================================================================
-    // HOW TO ADD NEXT SUNDAY'S REPORT:
-    // 1. Upload your new HTML file (e.g. "2026-11-22.html") to this repository.
-    // 2. Add a new object at the TOP of the `seriesArchive` list below!
-    // =========================================================================
-    const seriesArchive = [
-      {
-        file: "2026-11-15.html",
-        dateLabel: "15 Nov 2026",
-        title: "Juniors vs Seniors • 5-Over Series",
-        result: "Juniors Win 4 – 1",
-        winnerTeam: "Juniors",
-        format: "5-Match Series (5 Overs)",
-        highlights: "🎩 Isuru Hat-Trick (Opener) • Madushanka 86 Runs (SR 286.7) • Nethuka 6 Wkts",
-        latest: true
+    const GITHUB_OWNER = "BhasuraLiyanage";
+    const GITHUB_REPO = "CreaseCount-Archives";
+    let discoveredSeries = [];
+
+    function formatReadableDate(isoDate) {
+      const [y, m, d] = isoDate.split("-").map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC"
+      });
+    }
+
+    // Automatically inspects each uploaded HTML file to pull its headline & result badge
+    async function extractReportMetadata(fileName) {
+      const isoDate = fileName.replace(".html", "");
+      const dateLabel = formatReadableDate(isoDate);
+
+      try {
+        const res = await fetch(`${fileName}?t=${Date.now()}`);
+        const htmlText = await res.text();
+        const doc = new DOMParser().parseFromString(htmlText, "text/html");
+
+        const h1Text = (doc.querySelector("h1")?.textContent || "").replace(/\s+/g, " ").trim();
+        const badgeText = (doc.querySelector("section span")?.textContent || "").replace(/\s+/g, " ").trim();
+        const titleTag = (doc.querySelector("title")?.textContent || "").replace(/\s+/g, " ").trim();
+
+        const isPending = /pending/i.test(h1Text + " " + badgeText + " " + titleTag);
+        const isJuniorsWin = /juniors win/i.test(h1Text);
+        const isSeniorsWin = /seniors win/i.test(h1Text);
+
+        let result = "Completed Series";
+        let winnerTeam = "Neutral";
+
+        if (isPending) {
+          result = "Pending Results";
+          winnerTeam = "Pending";
+        } else if (isJuniorsWin) {
+          result = h1Text;
+          winnerTeam = "Juniors";
+        } else if (isSeniorsWin) {
+          result = h1Text;
+          winnerTeam = "Seniors";
+        } else if (h1Text) {
+          result = h1Text;
+        }
+
+        return {
+          file: fileName,
+          isoDate,
+          dateLabel,
+          title: "Juniors vs Seniors • Sunday Series",
+          result,
+          winnerTeam,
+          format: badgeText || "Sunday Series",
+          highlights: isPending
+            ? "⏳ Scheduled series • Scorecards & leaderboards will appear after play"
+            : `Full interactive scorecard, batting strike rates & bowling figures (${fileName})`
+        };
+      } catch (err) {
+        return {
+          file: fileName,
+          isoDate,
+          dateLabel,
+          title: "Juniors vs Seniors • Sunday Series",
+          result: "View Report",
+          winnerTeam: "Neutral",
+          format: "Sunday Series",
+          highlights: `Archived report file: ${fileName}`
+        };
       }
-      // Example for next Sunday (uncomment and edit when ready):
-      // ,{
-      //   file: "2026-11-22.html",
-      //   dateLabel: "22 Nov 2026",
-      //   title: "Juniors vs Seniors • Sunday Series",
-      //   result: "Seniors Win 3 – 2",
-      //   winnerTeam: "Seniors",
-      //   format: "5-Match Series (5 Overs)",
-      //   highlights: "Top Batter & Bowler highlights here",
-      //   latest: false
-      // }
-    ];
+    }
+
+    async function loadReportsAutomatically() {
+      try {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
+        const response = await fetch(apiUrl, {
+          headers: { "Accept": "application/vnd.github.v3+json" }
+        });
+
+        if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+        const files = await response.json();
+
+        // Match any file named YYYY-MM-DD.html (e.g., 2026-11-15.html, 2026-11-22.html)
+        const reportFiles = files
+          .filter(f => f.type === "file" && /^\d{4}-\d{2}-\d{2}\.html$/i.test(f.name))
+          .map(f => f.name)
+          .sort((a, b) => b.localeCompare(a)); // Newest date first
+
+        discoveredSeries = await Promise.all(
+          reportFiles.map(fileName => extractReportMetadata(fileName))
+        );
+
+        discoveredSeries.forEach((item, idx) => {
+          item.latest = (idx === 0);
+        });
+
+        populateDropdown();
+        renderArchive();
+      } catch (error) {
+        console.error("Failed to auto-discover reports:", error);
+        document.getElementById("total-series-badge").textContent = "Sync Error";
+        document.getElementById("series-cards-list").innerHTML = `
+          <div class="glass-card rounded-2xl p-6 text-center text-sm text-rose-300">
+            Could not automatically fetch repository files (${error.message}). Ensure the repository is Public.
+          </div>
+        `;
+      }
+    }
 
     function populateDropdown() {
       const select = document.getElementById("series-dropdown");
-      select.innerHTML = seriesArchive.map((s, idx) => `
+      if (discoveredSeries.length === 0) {
+        select.innerHTML = `<option value="">No YYYY-MM-DD.html reports found yet</option>`;
+        return;
+      }
+      select.innerHTML = discoveredSeries.map((s, idx) => `
         <option value="${s.file}">
-          ${idx === 0 ? "★ LATEST: " : ""}${s.dateLabel} — ${s.result} (${s.title})
+          ${idx === 0 ? "★ LATEST: " : ""}${s.dateLabel} — ${s.result}
         </option>
       `).join("");
     }
@@ -160,21 +250,23 @@
 
     function renderArchive() {
       const query = document.getElementById("search-input").value.toLowerCase().trim();
-      const filtered = seriesArchive.filter(s =>
+      const filtered = discoveredSeries.filter(s =>
         s.dateLabel.toLowerCase().includes(query) ||
+        s.isoDate.toLowerCase().includes(query) ||
         s.title.toLowerCase().includes(query) ||
         s.result.toLowerCase().includes(query) ||
+        s.format.toLowerCase().includes(query) ||
         s.highlights.toLowerCase().includes(query)
       );
 
       document.getElementById("total-series-badge").textContent =
-        `${seriesArchive.length} ${seriesArchive.length === 1 ? "Series" : "Series"} Logged`;
+        `${discoveredSeries.length} Series Auto-Detected`;
 
       const list = document.getElementById("series-cards-list");
       if (filtered.length === 0) {
         list.innerHTML = `
           <div class="glass-card rounded-2xl p-8 text-center text-sm text-slate-400">
-            No matching series found for "${query}".
+            No matching series found${query ? ` for "${query}"` : ""}.
           </div>
         `;
         return;
@@ -182,9 +274,16 @@
 
       list.innerHTML = filtered.map(s => {
         const isJun = s.winnerTeam === "Juniors";
-        const resultBadge = isJun
-          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-          : "bg-amber-500/15 text-amber-300 border-amber-500/30";
+        const isSen = s.winnerTeam === "Seniors";
+        const isPending = s.winnerTeam === "Pending";
+
+        const resultBadge = isPending
+          ? "bg-slate-800 text-slate-300 border-slate-700"
+          : isJun
+            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+            : isSen
+              ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+              : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30";
 
         return `
           <a href="${s.file}" class="series-card glass-card rounded-2xl p-5 sm:p-6 block">
@@ -204,7 +303,7 @@
                 <span class="text-xs font-bold px-3 py-1 rounded-full border ${resultBadge}">
                   ${s.result}
                 </span>
-                <span class="text-xs font-semibold text-emerald-400 group-hover:translate-x-0.5 transition">
+                <span class="text-xs font-semibold text-emerald-400">
                   View Scorecard →
                 </span>
               </div>
@@ -214,10 +313,7 @@
       }).join("");
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      populateDropdown();
-      renderArchive();
-    });
+    document.addEventListener("DOMContentLoaded", loadReportsAutomatically);
   </script>
 </body>
 </html>
