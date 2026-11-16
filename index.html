@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreaseCount Pro • Series Archive Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060913;
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 45%);
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+    h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.55);
+    }
+    .series-card {
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .series-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(16, 185, 129, 0.5);
+      background-color: rgba(15, 23, 42, 0.92);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-500/30 selection:text-emerald-200 flex flex-col min-h-screen">
+
+  <!-- Top Bar -->
+  <header class="border-b border-slate-800/80 bg-[#060913]/85 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display font-bold text-lg tracking-tight text-white">CreaseCount<span class="text-emerald-400">Pro</span></span>
+          <span class="ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">Archives</span>
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 font-mono-num" id="total-series-badge">1 Series Logged</div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 flex-1 space-y-8">
+
+    <!-- Hero & Quick Dropdown Selector -->
+    <section class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+      <div class="space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
+          Sunday Cricket Series Vault
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Select a Series Report
+        </h1>
+        <p class="text-slate-400 text-sm max-w-2xl">
+          Browse every Sunday series scorecard, batting leaderboard, and bowling breakdown. Use the quick jump menu below or pick any card from the archive timeline.
+        </p>
+      </div>
+
+      <!-- Quick Jump Dropdown + Open Button -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <div class="relative flex-1">
+          <select id="series-dropdown" aria-label="Select Series"
+            class="w-full appearance-none bg-slate-950/90 border border-slate-700/90 hover:border-emerald-500/50 focus:border-emerald-400 focus:outline-none rounded-2xl px-4 py-3.5 pr-10 text-sm font-semibold text-white transition cursor-pointer">
+            <!-- Populated automatically by JS -->
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
+        </div>
+        <button onclick="openSelectedSeries()"
+          class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 transition shrink-0">
+          Open Report →
+        </button>
+      </div>
+    </section>
+
+    <!-- Search & Filter Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <h2 class="text-lg font-bold text-white">All Archived Series</h2>
+      <div class="relative w-full sm:w-64">
+        <input type="text" id="search-input" oninput="renderArchive()" placeholder="Search date, player, winner..."
+          class="w-full bg-slate-900/90 border border-slate-800 focus:border-emerald-500/50 focus:outline-none rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500" />
+      </div>
+    </div>
+
+    <!-- Series Cards List -->
+    <div id="series-cards-list" class="space-y-4">
+      <!-- Populated automatically by JS -->
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+    CreaseCount Pro • Permanent Series Archive
+  </footer>
+
+  <script>
+    // =========================================================================
+    // HOW TO ADD NEXT SUNDAY'S REPORT:
+    // 1. Upload your new HTML file (e.g. "2026-11-22.html") to this repository.
+    // 2. Add a new object at the TOP of the `seriesArchive` list below!
+    // =========================================================================
+    const seriesArchive = [
+      {
+        file: "2026-11-15.html",
+        dateLabel: "15 Nov 2026",
+        title: "Juniors vs Seniors • 5-Over Series",
+        result: "Juniors Win 4 – 1",
+        winnerTeam: "Juniors",
+        format: "5-Match Series (5 Overs)",
+        highlights: "🎩 Isuru Hat-Trick (Opener) • Madushanka 86 Runs (SR 286.7) • Nethuka 6 Wkts",
+        latest: true
+      }
+      // Example for next Sunday (uncomment and edit when ready):
+      // ,{
+      //   file: "2026-11-22.html",
+      //   dateLabel: "22 Nov 2026",
+      //   title: "Juniors vs Seniors • Sunday Series",
+      //   result: "Seniors Win 3 – 2",
+      //   winnerTeam: "Seniors",
+      //   format: "5-Match Series (5 Overs)",
+      //   highlights: "Top Batter & Bowler highlights here",
+      //   latest: false
+      // }
+    ];
+
+    function populateDropdown() {
+      const select = document.getElementById("series-dropdown");
+      select.innerHTML = seriesArchive.map((s, idx) => `
+        <option value="${s.file}">
+          ${idx === 0 ? "★ LATEST: " : ""}${s.dateLabel} — ${s.result} (${s.title})
+        </option>
+      `).join("");
+    }
+
+    function openSelectedSeries() {
+      const file = document.getElementById("series-dropdown").value;
+      if (file) window.location.href = file;
+    }
+
+    function renderArchive() {
+      const query = document.getElementById("search-input").value.toLowerCase().trim();
+      const filtered = seriesArchive.filter(s =>
+        s.dateLabel.toLowerCase().includes(query) ||
+        s.title.toLowerCase().includes(query) ||
+        s.result.toLowerCase().includes(query) ||
+        s.highlights.toLowerCase().includes(query)
+      );
+
+      document.getElementById("total-series-badge").textContent =
+        `${seriesArchive.length} ${seriesArchive.length === 1 ? "Series" : "Series"} Logged`;
+
+      const list = document.getElementById("series-cards-list");
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="glass-card rounded-2xl p-8 text-center text-sm text-slate-400">
+            No matching series found for "${query}".
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = filtered.map(s => {
+        const isJun = s.winnerTeam === "Juniors";
+        const resultBadge = isJun
+          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+          : "bg-amber-500/15 text-amber-300 border-amber-500/30";
+
+        return `
+          <a href="${s.file}" class="series-card glass-card rounded-2xl p-5 sm:p-6 block">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-mono-num text-xs font-bold text-cyan-300">${s.dateLabel}</span>
+                  <span class="text-slate-600">•</span>
+                  <span class="text-xs text-slate-400">${s.format}</span>
+                  ${s.latest ? `<span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950">Latest</span>` : ""}
+                </div>
+                <h3 class="text-xl font-bold text-white">${s.title}</h3>
+                <p class="text-xs text-slate-300">${s.highlights}</p>
+              </div>
+
+              <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
+                <span class="text-xs font-bold px-3 py-1 rounded-full border ${resultBadge}">
+                  ${s.result}
+                </span>
+                <span class="text-xs font-semibold text-emerald-400 group-hover:translate-x-0.5 transition">
+                  View Scorecard →
+                </span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateDropdown();
+      renderArchive();
+    });
+  </script>
+</body>
+</html>
